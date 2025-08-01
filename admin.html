@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Data Resource Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .auth-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .login-form {
+            background: rgba(255,255,255,0.2);
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .login-form h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .login-form input {
+            padding: 12px;
+            margin: 0 10px 10px 0;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.9);
+            font-size: 1rem;
+            width: 200px;
+        }
+
+        .auth-status {
+            color: white;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .mode-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .mode-btn:hover {
+            background: white;
+            color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .mode-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .admin-panel {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .logout-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logout-section span {
+            color: white;
+            background: rgba(34, 197, 94, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            margin-right: 15px;
+        }
+
+        .add-resource-form {
+            background: linear-gradient(145deg, #f8f9ff, #e8ecff);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e6ff;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(145deg, #ff6b6b, #ee5a52);
+        }
+
+        .existing-resources h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .resource-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .resource-item h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .resource-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-form {
+            display: none;
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .edit-form.active {
+            display: block;
+        }
+
+        .instruction-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .warning-box {
+            background: #fef3cd;
+            border: 1px solid #faebcc;
+            color: #8a6d3b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .login-form input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔒 Admin Panel</h1>
+            <p>Data Resource Manager - Administrative Interface</p>
+        </div>
+
+        <!-- Authentication Section -->
+        <div class="auth-section">
+            <div id="auth-status" class="auth-status"></div>
+            <div id="login-form" class="login-form">
+                <h3>Admin Authentication Required</h3>
+                <div class="warning-box">
+                    <strong>⚠️ Authorized Access Only</strong><br>
+                    This is a restricted administrative interface. Unauthorized access is prohibited.
+                </div>
+                <input type="password" id="admin-password" placeholder="Enter admin password">
+                <button class="mode-btn" onclick="authenticateUser()">Login</button>
+            </div>
+            <div id="logout-section" class="logout-section hidden">
+                <span>✅ Logged in as Administrator</span>
+                <button class="mode-btn" onclick="logoutUser()">Logout</button>
+            </div>
+        </div>
+
+        <!-- Admin Panel Content -->
+        <div id="admin-content" class="admin-panel hidden">
+            <div class="add-resource-form">
+                <h3 style="color: #667eea; margin-bottom: 20px;">➕ Add New Resource</h3>
+                <form id="add-resource-form">
+                    <div class="form-group">
+                        <label for="title">Title</label>
+                        <input type="text" id="title" name="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="url">Website URL</label>
+                        <input type="url" id="url" name="url" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="instructions">Usage Guidelines (one per line)</label>
+                        <textarea id="instructions" name="instructions" placeholder="Enter each guideline on a new line"></textarea>
+                    </div>
+                    <button type="submit" class="btn">Add Resource</button>
+                </form>
+            </div>
+
+            <div class="existing-resources">
+                <h3>📋 Manage Existing Resources</h3>
+                <div id="existing-resources-list">
+                    <!-- Resources will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ⚠️ SECURITY CONFIGURATION
+        const ADMIN_PASSWORD = "DataAdmin2024!"; // ⚠️ CHANGE THIS PASSWORD!
+        let isAuthenticated = false;
+
+        // Data storage - in production, this would sync with a database
+        let resources = [
+            {
+                id: 1,
+                title: "Statista - The Statistics Portal for Market Data",
+                description: "Comprehensive market research and business intelligence platform with statistics, forecasts, and market data",
+                url: "https://www.statista.com",
+                instructions: [
+                    "Check for new industry reports weekly",
+                    "Bookmark relevant statistics for projects",
+                    "Monitor subscription status monthly",
+                    "Download key infographics for presentations",
+                    "Set up alerts for specific market sectors"
+                ]
+            },
+            {
+                id: 2,
+                title: "Data Mine",
+                description: "Data mining and analytics resource for extracting insights from large datasets",
+                url: "https://datamine.com",
+                instructions: [
+                    "Review new data mining techniques monthly",
+                    "Practice with sample datasets",
+                    "Update analysis tools and scripts",
+                    "Follow best practices documentation",
+                    "Check for new tutorials and guides"
+                ]
+            },
+            {
+                id: 3,
+                title: "UNdata",
+                description: "United Nations database with global statistics and indicators from multiple UN organizations",
+                url: "https://data.un.org",
+                instructions: [
+                    "Check for updated global statistics quarterly",
+                    "Download datasets for research projects",
+                    "Monitor SDG indicator updates",
+                    "Bookmark frequently used country profiles",
+                    "Subscribe to data release notifications"
+                ]
+            },
+            {
+                id: 4,
+                title: "Find Open Datasets and Machine Learning",
+                description: "Repository for discovering open datasets suitable for machine learning and data science projects",
+                url: "https://findopendata.com",
+                instructions: [
+                    "Browse new datasets weekly",
+                    "Test dataset quality before use",
+                    "Maintain list of useful datasets",
+                    "Check licensing terms for each dataset",
+                    "Contribute dataset reviews and ratings"
+                ]
+            },
+            {
+                id: 5,
+                title: "Dataset Search",
+                description: "Google's dataset search engine for finding datasets across the web",
+                url: "https://datasetsearch.research.google.com",
+                instructions: [
+                    "Use specific keywords for better results",
+                    "Filter by usage rights and format",
+                    "Verify dataset currency and accuracy",
+                    "Check original source credibility",
+                    "Save useful search queries for later"
+                ]
+            },
+            {
+                id: 6,
+                title: "Data.gov Home - Data.gov",
+                description: "US government's open data portal providing access to federal datasets",
+                url: "https://www.data.gov",
+                instructions: [
+                    "Monitor new dataset releases monthly",
+                    "Check for API updates and changes",
+                    "Verify data freshness before use",
+                    "Follow data quality guidelines",
+                    "Subscribe to relevant topic newsletters"
+                ]
+            },
+            {
+                id: 7,
+                title: "World Bank Open Data",
+                description: "Free access to World Bank data on development, economics, and demographics worldwide",
+                url: "https://data.worldbank.org",
+                instructions: [
+                    "Check for updated country indicators quarterly",
+                    "Download data in preferred formats",
+                    "Use API for automated data collection",
+                    "Monitor methodology changes",
+                    "Cross-reference with other sources"
+                ]
+            },
+            {
+                id: 8,
+                title: "data.europa.eu",
+                description: "European Union's official data portal providing access to EU open datasets",
+                url: "https://data.europa.eu",
+                instructions: [
+                    "Browse new EU policy datasets",
+                    "Check multilingual data availability",
+                    "Monitor GDPR compliance updates",
+                    "Use advanced search filters effectively",
+                    "Subscribe to dataset update notifications"
+                ]
+            }
+        ];
+
+        let nextId = 9;
+
+        // Authentication functions
+        function authenticateUser() {
+            const password = document.getElementById('admin-password').value;
+            if (password === ADMIN_PASSWORD) {
+                isAuthenticated = true;
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('logout-section').classList.remove('hidden');
+                document.getElementById('admin-content').classList.remove('hidden');
+                document.getElementById('auth-status').innerHTML = '<div class="success-message">✅ Authentication successful! Welcome to the admin panel.</div>';
+                document.getElementById('admin-password').value = '';
+                renderManagementInterface();
+            } else {
+                document.getElementById('auth-status').innerHTML = '<div style="color: #ff6b6b; background: rgba(255,107,107,0.1); padding: 10px; border-radius: 5px;">❌ Invalid password. Access denied.</div>';
+                document.getElementById('admin-password').value = '';
+            }
+        }
+
+        function logoutUser() {
+            if (confirm('Are you sure you want to logout?')) {
+                isAuthenticated = false;
+                document.getElementById('login-form').classList.remove('hidden');
+                document.getElementById('logout-section').classList.add('hidden');
+                document.getElementById('admin-content').classList.add('hidden');
+                document.getElementById('auth-status').textContent = '';
+            }
+        }
+
+        function renderManagementInterface() {
+            const list = document.getElementById('existing-resources-list');
+            if (resources.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666;">No resources to manage yet.</p>';
+                return;
+            }
+
+            list.innerHTML = resources.map(resource => `
+                <div class="resource-item" id="resource-${resource.id}">
+                    <h4>${resource.title}</h4>
+                    <p><strong>URL:</strong> <a href="${resource.url}" target="_blank">${resource.url}</a></p>
+                    <p><strong>Description:</strong> ${resource.description}</p>
+                    <p><strong>Guidelines:</strong> ${resource.instructions.join(', ')}</p>
+                    <div class="resource-actions">
+                        <button class="btn" onclick="toggleEditForm(${resource.id})">✏️ Edit</button>
+                        <button class="btn btn-danger" onclick="deleteResource(${resource.id})">🗑️ Delete</button>
+                    </div>
+                    <div class="edit-form" id="edit-form-${resource.id}">
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" id="edit-title-${resource.id}" value="${resource.title}">
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="edit-description-${resource.id}">${resource.description}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>URL</label>
+                            <input type="url" id="edit-url-${resource.id}" value="${resource.url}">
+                        </div>
+                        <div class="form-group">
+                            <label>Usage Guidelines</label>
+                            <div id="instructions-${resource.id}">
+                                ${resource.instructions.map((instruction, index) => `
+                                    <div style="display: flex; margin-bottom: 10px; align-items: center;">
+                                        <input type="text" class="instruction-input" value="${instruction}" data-index="${index}">
+                                        <button type="button" class="btn btn-danger" style="padding: 5px 10px; margin-left: 10px;" onclick="removeInstruction(${resource.id}, ${index})">Remove</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button type="button" class="btn" onclick="addInstruction(${resource.id})">➕ Add Guideline</button>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <button class="btn" onclick="saveResource(${resource.id})">💾 Save Changes</button>
+                            <button class="btn" onclick="toggleEditForm(${resource.id})" style="background: #666;">❌ Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleEditForm(id) {
+            const form = document.getElementById(`edit-form-${id}`);
+            form.classList.toggle('active');
+        }
+
+        function addInstruction(resourceId) {
+            const container = document.getElementById(`instructions-${resourceId}`);
+            const newIndex = container.children.length;
+            const newInstruction = document.createElement('div');
+            newInstruction.style.cssText = 'display: flex; margin-bottom: 10px; align-items: center;';
+            newInstruction.innerHTML = `
+                <input type="text" class="instruction-input" value="" data-index="${newIndex}" placeholder="Enter new guideline">
+                <button type="button" class="btn btn-danger" style="padding: 5px 10px; margin-left: 10px;" onclick="removeInstruction(${resourceId}, ${newIndex})">Remove</button>
+            `;
+            container.appendChild(newInstruction);
+        }
+
+        function removeInstruction(resourceId, index) {
+            const container = document.getElementById(`instructions-${resourceId}`);
+            const instructions = container.children;
+            if (instructions.length > index) {
+                instructions[index].remove();
+                // Re-index remaining instructions
+                Array.from(instructions).forEach((inst, i) => {
+                    const input = inst.querySelector('.instruction-input');
+                    if (input) input.setAttribute('data-index', i);
+                    const button = inst.querySelector('.btn-danger');
+                    if (button) button.setAttribute('onclick', `removeInstruction(${resourceId}, ${i})`);
+                });
+            }
+        }
+
+        function saveResource(id) {
+            const resource = resources.find(r => r.id === id);
+            if (!resource) return;
+
+            resource.title = document.getElementById(`edit-title-${id}`).value;
+            resource.description = document.getElementById(`edit-description-${id}`).value;
+            resource.url = document.getElementById(`edit-url-${id}`).value;
+            
+            const instructionInputs = document.querySelectorAll(`#instructions-${id} .instruction-input`);
+            resource.instructions =
